@@ -142,3 +142,6 @@ dmypy.json
 
 ### Visual Studio Code ###
 .code/
+
+### Downloads ###
+downloads/
