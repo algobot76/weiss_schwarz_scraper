@@ -1,6 +1,7 @@
 import os
 import pathlib
 import shutil
+from urllib.parse import urlparse
 
 import requests
 import yaml
@@ -13,6 +14,8 @@ DOWNLOAD_DIR_PREFIX = pathlib.Path("downloads")
 DOWNLOAD_IMAGES = os.getenv("DOWNLOAD_IMAGES", False)
 if DOWNLOAD_IMAGES == "True":
     DOWNLOAD_IMAGES = True
+
+IMAGE_URL_PREFIX = "https://yuyu-tei.jp/card_image/ws/front"
 
 with open("urls.yaml", "r") as f:
     data = yaml.load(f, Loader=yaml.FullLoader)
@@ -38,6 +41,7 @@ for title, url in urls.items():
         name = card_unit.find("p", class_="name").get_text()
         image = card_unit.find("p", class_="image").img["src"]
         cards.append(dict(id=id_, name=name, image=image))
+    print(f"Got {len(cards)} cards.")
 
     if DOWNLOAD_IMAGES:
         download_dir = DOWNLOAD_DIR_PREFIX.joinpath(title)
@@ -45,12 +49,19 @@ for title, url in urls.items():
             shutil.rmtree(download_dir)
         download_dir.mkdir(parents=True)
         for card in cards:
-            id_ = card["id"]
-            new_id = id_.replace("/", "-")
+            name = card["name"]
             image = card["image"]
-            new_image = image.replace("90_126", "front")
-            download_path = download_dir.joinpath(f"{new_id}.jpg")
-            r = requests.get(new_image, stream=True)
+            segments = urlparse(image).path.split("/")
+            series = segments[-2]
+            file_name = segments[-1]
+            download_url = f"{IMAGE_URL_PREFIX}/{series}/{file_name}"
+            download_path = download_dir.joinpath(file_name)
+
+            print(f"Downloading {name}.")
+            r = requests.get(download_url, stream=True)
             if r.status_code == 200:
                 with open(download_path, "wb") as f:
                     shutil.copyfileobj(r.raw, f)
+                print(f"{name} has been downloaded.")
+            else:
+                print(f"Failed to download {name}.")
