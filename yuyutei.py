@@ -1,12 +1,18 @@
+import os
 import pathlib
 import shutil
 
 import requests
 import yaml
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
+
+load_dotenv()
 
 DOWNLOAD_DIR_PREFIX = pathlib.Path("downloads")
-DOWNLOAD_IMAGES = True
+DOWNLOAD_IMAGES = os.getenv("DOWNLOAD_IMAGES", False)
+if DOWNLOAD_IMAGES == "True":
+    DOWNLOAD_IMAGES = True
 
 with open("urls.yaml", "r") as f:
     data = yaml.load(f, Loader=yaml.FullLoader)
