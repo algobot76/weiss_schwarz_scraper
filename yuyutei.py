@@ -73,9 +73,7 @@ def main():
                 name = card["name"]
                 url = card["image"]
                 tts_obj = get_tts_dict(name, url)
-                file_name = url.split("/")[-1]
-                id_ = file_name.split(".")[0]
-                new_file_name = '.'.join([id_, "json"])
+                new_file_name = f"{name}.json"
                 file_path = download_dir.joinpath(new_file_name)
                 print(f"Exporting TTS file for {name}.")
                 with open(file_path, "w") as f:
@@ -87,9 +85,8 @@ def main():
             for card in cards:
                 name = card["name"]
                 download_url = card["image"]
-                file_name = download_url.split("/")[-1]
-                new_file_name = '.'.join([file_name.split(".")[0], "png"])
-                download_path = download_dir.joinpath(new_file_name)
+                file_name = f"{name}.png"
+                download_path = download_dir.joinpath(file_name)
 
                 print(f"Downloading {name}.")
                 r = requests.get(download_url, stream=True)
